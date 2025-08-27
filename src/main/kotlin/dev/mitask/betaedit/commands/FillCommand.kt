@@ -21,7 +21,6 @@ import net.minecraft.world.LightType
 import net.modificationstation.stationapi.api.registry.BlockRegistry
 import kotlin.system.measureTimeMillis
 
-
 class FillCommand : CommandProvider {
     override fun get(): LiteralArgumentBuilder<GlassCommandSource?>? {
         val root = literal("fill")
