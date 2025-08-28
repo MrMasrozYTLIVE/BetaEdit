@@ -8,8 +8,13 @@ class User {
     var pos2: Vec3i? = null
 
     fun addHistory(historyEdit: HistoryEdit) {
-        if(history.size > 5) history.removeAt(0)
+        if(history.size >= 5) history.removeAt(0)
 
         history.add(historyEdit)
+    }
+
+    fun popHistory(): HistoryEdit? {
+        if(history.isNotEmpty()) return history.removeAt(history.size - 1)
+        return null
     }
 }

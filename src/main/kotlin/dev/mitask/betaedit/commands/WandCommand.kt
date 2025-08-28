@@ -9,7 +9,7 @@ import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 
 class WandCommand : CommandProvider {
-    override fun get(): LiteralArgumentBuilder<GlassCommandSource?>? {
+    override fun get(): LiteralArgumentBuilder<GlassCommandSource> {
         return literal("/wand")
             .requires {
                 if(it.player == null) {

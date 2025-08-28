@@ -16,6 +16,9 @@ class BetaEdit {
     @Suppress("unused")
     fun registerCommands(event: CommandRegisterEvent) {
         event.register(FillCommand())
+
         event.register(WandCommand())
+        event.register(SetCommand())
+        event.register(UndoCommand())
     }
 }

@@ -5,9 +5,10 @@ import com.mojang.brigadier.arguments.IntegerArgumentType.integer
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import dev.mitask.betaedit.BetaEdit
+import dev.mitask.betaedit.data.BlockInfo
+import dev.mitask.betaedit.data.HistoryEdit
+import dev.mitask.betaedit.data.User
 import dev.mitask.betaedit.util.Cuboid
-import net.glasslauncher.glassbrigadier.api.argument.coordinate.CoordinateArgumentType.getCoordinate
-import net.glasslauncher.glassbrigadier.api.argument.coordinate.CoordinateArgumentType.intCoordinate
 import net.glasslauncher.glassbrigadier.api.argument.tileid.BlockId
 import net.glasslauncher.glassbrigadier.api.argument.tileid.BlockIdArgumentType.getTileId
 import net.glasslauncher.glassbrigadier.api.argument.tileid.BlockIdArgumentType.tileId
@@ -21,45 +22,57 @@ import net.minecraft.world.LightType
 import net.modificationstation.stationapi.api.registry.BlockRegistry
 import kotlin.system.measureTimeMillis
 
-class FillCommand : CommandProvider {
+class SetCommand : CommandProvider {
     override fun get(): LiteralArgumentBuilder<GlassCommandSource> {
-        val root = literal("fill")
-            .requires(booleanPermission("betaedit.fill"))
+        return literal("/set")
+            .requires {
+                if(it.player == null) {
+                    it.sendFeedback("Only players can execute this command!")
+                    return@requires false
+                }
 
-        val pos1 = argument("pos1", intCoordinate())
-        val pos2 = argument("pos2", intCoordinate())
+                return@requires booleanPermission("betaedit.set").test(it)
+            }
             .then(argument("id", tileId()).apply {
-                executes { fill(it) }
+                executes { set(it) }
 
                 then(argument("meta", integer()).apply {
-                    executes { fillWithMeta(it) }
+                    executes { setWithMeta(it) }
                 })
             })
-
-        return root.then(pos1.then(pos2))
     }
 
-    fun fill(context: CommandContext<GlassCommandSource>): Int {
-        val pos1: Vec3i = getCoordinate(context, "pos1").getVec3i(context.getSource())
-        val pos2: Vec3i = getCoordinate(context, "pos2").getVec3i(context.getSource())
+    fun set(context: CommandContext<GlassCommandSource>): Int {
         val block: BlockId = getTileId(context, "id")
+        val user = BetaEdit.users[context.source.player?.name ?: ""]
+        if(user == null) {
+            context.source.sendFeedback("§cSomething went wrong! (User == null)")
+            return 1
+        }
         val blockName = if(block.numericId == 0) "Air" else BlockRegistry.INSTANCE.get(block.id)?.translatedName ?: "Unknown"
 
-        val cuboid = Cuboid(pos1, pos2)
+        if(user.pos1 == null || user.pos2 == null) {
+            context.source.sendFeedback("§cPos1 or Pos2 is not set!")
+            return 1
+        }
+
         val world = (context.getSource())?.world!!
-        var success = 0
+        val cuboid = Cuboid(user.pos1!!, user.pos2!!)
+        val history = HistoryEdit(world, cuboid)
 
         BetaEdit.tasks.add(cuboid)
         val time = measureTimeMillis {
             cuboid.forEach { x, y, z ->
-                if(world.setBlock(x, y, z, block.numericId, 0)) success++
+                history.blocks.add(BlockInfo(Vec3i(x, y, z), world.getBlockId(x, y, z), world.getBlockMeta(x, y, z)))
+                world.setBlock(x, y, z, block.numericId, 0)
             }
         }
         BetaEdit.tasks.remove(cuboid)
+        user.addHistory(history)
 
         sendFeedbackAndLog(
             context.getSource(),
-            "§aReplaced $success/${cuboid.volume} blocks with $blockName in ${if(time > 5000) "${time / 1000} seconds" else "$time ms"}"
+            "§aSet ${cuboid.volume} blocks to $blockName in ${if(time > 5000) "${time / 1000} seconds" else "$time ms"}"
         )
 
         val subCuboids = cuboid.getSubCuboids()
@@ -75,28 +88,34 @@ class FillCommand : CommandProvider {
         return 0
     }
 
-    fun fillWithMeta(context: CommandContext<GlassCommandSource>): Int {
-        val pos1: Vec3i = getCoordinate(context, "pos1").getVec3i(context.getSource())
-        val pos2: Vec3i = getCoordinate(context, "pos2").getVec3i(context.getSource())
-        val block: BlockId = getTileId(context, "id")
+    fun setWithMeta(context: CommandContext<GlassCommandSource>): Int {
         val meta: Int = getInteger(context, "meta")
+        val block: BlockId = getTileId(context, "id")
+        val user = BetaEdit.users[context.source.player?.name ?: ""] ?: User()
         val blockName = if(block.numericId == 0) "Air" else BlockRegistry.INSTANCE.get(block.id)?.translatedName ?: "Unknown"
 
-        val cuboid = Cuboid(pos1, pos2)
+        if(user.pos1 == null || user.pos2 == null) {
+            context.source.sendFeedback("§cPos1 or Pos2 is not set!")
+            return 1
+        }
+
         val world = (context.getSource())?.world!!
-        var success = 0
+        val cuboid = Cuboid(user.pos1!!, user.pos2!!)
+        val history = HistoryEdit(world, cuboid)
 
         BetaEdit.tasks.add(cuboid)
         val time = measureTimeMillis {
             cuboid.forEach { x, y, z ->
-                if(world.setBlock(x, y, z, block.numericId, meta)) success++
+                history.blocks.add(BlockInfo(Vec3i(x, y, z), world.getBlockId(x, y, z), world.getBlockMeta(x, y, z)))
+                world.setBlock(x, y, z, block.numericId, meta)
             }
         }
         BetaEdit.tasks.remove(cuboid)
+        user.addHistory(history)
 
         sendFeedbackAndLog(
             context.getSource(),
-            "§aReplaced $success/${cuboid.volume} blocks with $blockName (meta: $meta) in ${if(time > 5000) "${time / 1000} seconds" else "$time ms"}"
+            "§aSet ${cuboid.volume} blocks to $blockName in ${if(time > 5000) "${time / 1000} seconds" else "$time ms"}"
         )
 
         val subCuboids = cuboid.getSubCuboids()
@@ -108,6 +127,7 @@ class FillCommand : CommandProvider {
             world.queueLightUpdate(LightType.SKY, sub.minX, sub.minY, sub.minZ, sub.maxX, sub.maxY, sub.maxZ, false)
             world.queueLightUpdate(LightType.BLOCK, sub.minX, sub.minY, sub.minZ, sub.maxX, sub.maxY, sub.maxZ, false)
         }
+
         return 0
     }
 }
