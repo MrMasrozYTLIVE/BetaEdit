@@ -20,5 +20,8 @@ class BetaEdit {
         event.register(WandCommand())
         event.register(SetCommand())
         event.register(UndoCommand())
+        event.register(RedoCommand())
+        event.register(Pos1Command())
+        event.register(Pos2Command())
     }
 }

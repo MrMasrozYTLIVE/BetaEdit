@@ -58,7 +58,7 @@ class SetCommand : CommandProvider {
 
         val world = (context.getSource())?.world!!
         val cuboid = Cuboid(user.pos1!!, user.pos2!!)
-        val history = HistoryEdit(world, cuboid)
+        val history = HistoryEdit(world, cuboid, changedToId = block.numericId)
 
         BetaEdit.tasks.add(cuboid)
         val time = measureTimeMillis {
@@ -101,7 +101,7 @@ class SetCommand : CommandProvider {
 
         val world = (context.getSource())?.world!!
         val cuboid = Cuboid(user.pos1!!, user.pos2!!)
-        val history = HistoryEdit(world, cuboid)
+        val history = HistoryEdit(world, cuboid, changedToId = block.numericId, changedToMeta = meta)
 
         BetaEdit.tasks.add(cuboid)
         val time = measureTimeMillis {
