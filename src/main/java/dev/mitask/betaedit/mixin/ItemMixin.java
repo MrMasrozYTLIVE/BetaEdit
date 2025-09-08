@@ -14,8 +14,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Item.class)
 class ItemMixin {
-    @Inject(method = "useOnBlock(Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/World;IIII)Z", at = @At("HEAD"))
-    private void useOnBlock(ItemStack stack, PlayerEntity player, World world, int x, int y, int z, int side, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "useOnBlock", at = @At("HEAD"))
+    private void betaedit$useOnBlock(ItemStack stack, PlayerEntity player, World world, int x, int y, int z, int side, CallbackInfoReturnable<Boolean> cir) {
         User user = BetaEdit.Companion.getUsers().get(player.name);
 
         if(user == null) {

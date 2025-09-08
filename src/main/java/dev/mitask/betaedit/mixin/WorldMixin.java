@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(World.class)
 class WorldMixin {
     @WrapMethod(method = "queueLightUpdate(Lnet/minecraft/world/LightType;IIIIII)V")
-    private void queueLightUpdates(LightType type, int minX, int minY, int minZ, int maxX, int maxY, int maxZ, Operation<Void> original) {
+    private void betaedit$queueLightUpdates(LightType type, int minX, int minY, int minZ, int maxX, int maxY, int maxZ, Operation<Void> original) {
         if (BetaEdit.Companion.getTasks().isEmpty()) {
             original.call(type, minX, minY, minZ, maxX, maxY, maxZ);
             return;

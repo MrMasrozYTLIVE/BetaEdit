@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(PlayerManager.class)
 class PlayerManagerMixin {
     @Inject(method = "disconnect(Lnet/minecraft/entity/player/ServerPlayerEntity;)V", at = @At("HEAD"))
-    private void onDisconnect(ServerPlayerEntity player, CallbackInfo ci) {
+    private void betaedit$onDisconnect(ServerPlayerEntity player, CallbackInfo ci) {
         BetaEdit.Companion.getUsers().remove(player.name);
     }
 }

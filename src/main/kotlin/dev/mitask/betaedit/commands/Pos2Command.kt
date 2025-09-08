@@ -42,7 +42,7 @@ class Pos2Command : CommandProvider {
             pos = getCoordinate(context, "pos").getVec3i(context.getSource())
         } catch (_: IllegalArgumentException) {}
 
-        if(pos == null) user.pos2 = Vec3i(player.x.toInt(), player.y.toInt(), player.z.toInt())
+        if(pos == null) user.pos2 = Vec3i(player.x.toInt(), player.y.toInt() - 2, player.z.toInt())
         else user.pos2 = pos
 
         context.source.sendFeedback("§bPos 2 set to [${user.pos2!!.x}, ${user.pos2!!.y}, ${user.pos2!!.z}]")

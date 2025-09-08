@@ -1,6 +1,7 @@
 package dev.mitask.betaedit.commands
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
+import dev.mitask.betaedit.BetaEdit
 import net.glasslauncher.glassbrigadier.api.command.CommandProvider
 import net.glasslauncher.glassbrigadier.api.command.GlassCommandSource
 import net.glasslauncher.glassbrigadier.api.predicate.HasPermission.booleanPermission
@@ -23,7 +24,7 @@ class WandCommand : CommandProvider {
                 val source = context.source
 
                 val item = ItemStack(Item.WOODEN_AXE)
-                item.stationNbt.putBoolean("wand", true)
+                item.stationNbt.putBoolean(BetaEdit.wandIdentifier.toString(), true)
 
                 val success = source.player?.inventory?.addStack(item) ?: return@executes 1
                 source.sendFeedback(if(success) "§aSuccessfully gave wand" else "§cCould not give wand to the player")
