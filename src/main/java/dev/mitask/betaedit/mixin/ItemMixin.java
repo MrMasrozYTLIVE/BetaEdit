@@ -23,7 +23,7 @@ class ItemMixin {
             BetaEdit.Companion.getUsers().put(player.name, user);
         }
 
-        if(!stack.getStationNbt().getBoolean("wand")) return;
+        if(!stack.getStationNbt().getBoolean(BetaEdit.Companion.getWandIdentifier().toString())) return;
 
         user.setPos2(new Vec3i(x, y, z));
         player.sendMessage("§bPos 2 set to [" + x + ", " + y + ", " + z + "]");
