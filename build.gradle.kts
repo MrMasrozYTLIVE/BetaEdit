@@ -5,6 +5,7 @@ plugins {
 	id("fabric-loom") version "1.9.2"
 	id("babric-loom-extension") version "1.9.3"
     kotlin("jvm")
+    kotlin("kapt") version "2.2.10-RC"
 }
 
 //noinspection GroovyUnusedAssignment
